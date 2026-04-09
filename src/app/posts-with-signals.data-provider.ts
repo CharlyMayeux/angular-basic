@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { computed, inject, Injectable, Injector } from '@angular/core';
 
-import { BehaviorSubject, finalize, map, Observable, shareReplay, switchMap, take, tap } from 'rxjs';
+import { BehaviorSubject, finalize, firstValueFrom, map, Observable, shareReplay, switchMap, take, tap } from 'rxjs';
 
 import { Post, PostResponse } from './post.model';
 import { WebApiResponse } from './web-api.model';
@@ -39,6 +39,12 @@ export class PostsDataProviderUsingSignals  {
       map((response) => ({ data: response } as WebApiResponse<Post>)),
       errorOperator<Post>(),
     );
+  }
+  public updateUsingPromise(post: Post): Promise<WebApiResponse<Post>> {
+    return firstValueFrom(this._http.put<PostResponse>(`http://localhost:3000/posts/${post.id}`, post).pipe(
+      map((response) => ({ data: response } as WebApiResponse<Post>)),
+      errorOperator<Post>(),
+    ));
   }
 }
 
@@ -81,5 +87,13 @@ export class PostsServiceUsingSignals {
     //   injector: this._injector,
     // });
     return action;
+  }
+  public async updateUsingPromise(post: Post): Promise<WebApiResponse<Post>> {
+    const response = await this._postsDP.updateUsingPromise(post);
+    // on refetch les posts après la mise à jour pour avoir les données à jour,
+    // mais on pourrait aussi faire du cache management pour éviter de faire un refetch complet
+    // en gérant un BehaviorSubject dans ce service
+    this._postsDP.reload();
+    return response;
   }
 }

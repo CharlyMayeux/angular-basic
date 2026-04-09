@@ -37,12 +37,13 @@ export class PostsPage {
     event.preventDefault();
 
     submit(this.currentSelection, {
-      action: (field) => {
+      action: async (field) => {
         const selection = field().value();
         if (selection) {
-          this._postsService.update(selection).pipe(take(1)).subscribe();
+          // this._postsService.update(selection).pipe(take(1)).subscribe();
+          await this._postsService.updateUsingPromise(selection);
+          // l await ne sert à rien dans ce cas
         }
-        return Promise.resolve()
       },
     })
   }
