@@ -21,13 +21,13 @@ export type Post = PostResponse;
 export class PostsDataProvider {
   private readonly _http = inject(HttpClient);
 
-  private readonly _refresh  = new BehaviorSubject<boolean>(false);
+  private readonly _refresh  = new BehaviorSubject<void>(void 0);
   private readonly _postsResponse$: Observable<WebApiResponse<Post[]>> = this._http.get<PostResponse[]>('http://localhost:3000/posts').pipe(
     map((response) => ({ data: response } as WebApiResponse<Post[]>)),
     errorOperator<PostResponse[]>(),
   );
   public readonly postsResponse$: Observable<WebApiResponse<Post[]>> = this._refresh.pipe(
-    tap(() => console.log('refreshing posts...')),
+    tap((v) => console.log('refreshing posts...', v)),
     // switchMap pour annuler les requêtes en cours si on déclenche un refresh avant la fin de la précédente
     switchMap(() => this._postsResponse$),
     // shareReplay pour partager la même réponse entre tous les abonnés et éviter de faire plusieurs requêtes si plusieurs composants s'abonnent à postsResponse$ en même temps
@@ -36,7 +36,7 @@ export class PostsDataProvider {
   );
 
   public reload() {
-    this._refresh.next(true);
+    this._refresh.next(void 0);
   }
 
   public update(post: Post): Observable<WebApiResponse<Post>> {
