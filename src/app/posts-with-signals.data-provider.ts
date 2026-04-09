@@ -1,12 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 
 import { toSignal } from '@angular/core/rxjs-interop';
-import { computed, inject, Injectable, Injector } from '@angular/core';
+import { computed, inject, Injectable, Injector, Signal } from '@angular/core';
 
 import { BehaviorSubject, finalize, firstValueFrom, map, Observable, shareReplay, switchMap, take, tap } from 'rxjs';
 
 import { Post, PostResponse } from './post.model';
-import { WebApiResponse } from './web-api.model';
+import { ErrorResponse, WebApiResponse } from './web-api.model';
 import { errorOperator } from './web-api.utils';
 
 
@@ -14,9 +14,9 @@ import { errorOperator } from './web-api.utils';
   providedIn: 'root',
 })
 export class PostsDataProviderUsingSignals  {
-  private readonly _http = inject(HttpClient);
+  private readonly _http: HttpClient = inject(HttpClient);
 
-  private readonly _refresh  = new BehaviorSubject<void>(void 0);
+  private readonly _refresh: BehaviorSubject<void> = new BehaviorSubject<void>(void 0);
   private readonly _postsResponse$: Observable<WebApiResponse<Post[]>> = this._http.get<PostResponse[]>('http://localhost:3000/posts').pipe(
     map((response) => ({ data: response } as WebApiResponse<Post[]>)),
     errorOperator<PostResponse[]>(),
@@ -30,7 +30,7 @@ export class PostsDataProviderUsingSignals  {
     shareReplay(1)
   );
 
-  public reload() {
+  public reload(): void {
     this._refresh.next(void 0);
   }
 
@@ -48,23 +48,21 @@ export class PostsDataProviderUsingSignals  {
   }
 }
 
-
-
 @Injectable({
   providedIn: 'root',
 })
 export class PostsServiceUsingToSignals {
-  private readonly _injector = inject(Injector);
-  private readonly _postsDP = inject(PostsDataProviderUsingSignals);
+  private readonly _injector: Injector = inject(Injector);
+  private readonly _postsDP: PostsDataProviderUsingSignals = inject(PostsDataProviderUsingSignals);
   // Pas d'interet d'avoir un service + data provider si on fait juste un passe plat
   // => boilerplate inutile
-  public readonly postsResponse = toSignal(this._postsDP.postsResponse$, {
+  public readonly postsResponse: Signal<WebApiResponse<Post[]>> = toSignal(this._postsDP.postsResponse$, {
     initialValue: { data: [], error: [] } as WebApiResponse<Post[]>,
   });
   // on sépare donc la couche de service de la couche de data provider pour pouvoir faire du mapping, du caching, etc... dans le service sans impacter le data provider
-  public readonly posts = computed(() => this.postsResponse().data ?? []);
-  public readonly error = computed(() => this.postsResponse().error ?? []);
-  public readonly hasError = computed(() => !!this.postsResponse().error);
+  public readonly posts: Signal<Post[]> = computed(() => this.postsResponse().data ?? []);
+  public readonly error: Signal<ErrorResponse[]> = computed(() => this.postsResponse().error ?? []);
+  public readonly hasError: Signal<boolean> = computed(() => !!this.postsResponse().error);
 
   public update(post: Post): Observable<WebApiResponse<Post>> {
 

@@ -4,16 +4,16 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, finalize, map, Observable, shareReplay, switchMap, take, tap } from 'rxjs';
 
 import { Post, PostResponse } from './post.model';
-import { WebApiResponse } from './web-api.model';
+import { ErrorResponse, WebApiResponse } from './web-api.model';
 import { errorOperator } from './web-api.utils';
 
 @Injectable({
   providedIn: 'root',
 })
 class PostsDataProvider {
-  private readonly _http = inject(HttpClient);
+  private readonly _http: HttpClient = inject(HttpClient);
 
-  private readonly _refresh  = new BehaviorSubject<void>(void 0);
+  private readonly _refresh: BehaviorSubject<void> = new BehaviorSubject<void>(void 0);
   private readonly _postsResponse$: Observable<WebApiResponse<Post[]>> = this._http.get<PostResponse[]>('http://localhost:3000/posts').pipe(
     map((response) => ({ data: response } as WebApiResponse<Post[]>)),
     errorOperator<PostResponse[]>(),
@@ -27,7 +27,7 @@ class PostsDataProvider {
     shareReplay(1)
   );
 
-  public reload() {
+  public reload(): void {
     this._refresh.next(void 0);
   }
 
@@ -43,14 +43,14 @@ class PostsDataProvider {
   providedIn: 'root',
 })
 export class PostsService {
-  private readonly _postsDP = inject(PostsDataProvider);
+  private readonly _postsDP: PostsDataProvider = inject(PostsDataProvider);
   // Pas d'interet d'avoir un service + data provider si on fait juste un passe plat
   // => boilerplate inutile
   public readonly postsResponse$: Observable<WebApiResponse<Post[]>> = this._postsDP.postsResponse$;
   // on sépare donc la couche de service de la couche de data provider pour pouvoir faire du mapping, du caching, etc... dans le service sans impacter le data provider
-  public readonly posts$ = this.postsResponse$.pipe(map((response) => (response.data ?? []) as Post[]));
-  public readonly error$ = this.postsResponse$.pipe(map((response) => (response.error ?? [])));
-  public readonly hasError$ = this.postsResponse$.pipe(map((response) => !!response.error));
+  public readonly posts$: Observable<Post[]> = this.postsResponse$.pipe(map((response) => (response.data ?? []) as Post[]));
+  public readonly error$: Observable<ErrorResponse[]> = this.postsResponse$.pipe(map((response) => (response.error ?? [])));
+  public readonly hasError$: Observable<boolean> = this.postsResponse$.pipe(map((response) => !!response.error));
 
   public update(post: Post): Observable<WebApiResponse<Post>> {
     return this._postsDP.update(post).pipe(take(1), finalize(() => {
