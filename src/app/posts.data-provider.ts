@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, Injector } from '@angular/core';
 
 import { BehaviorSubject, finalize, map, Observable, shareReplay, Subject, switchMap, take, tap } from 'rxjs';
 
@@ -75,6 +75,7 @@ export class PostsService {
   providedIn: 'root',
 })
 export class PostsServiceFromObsToSignal {
+  private readonly _injector = inject(Injector);
   private readonly _postsDP = inject(PostsDataProvider);
   // Pas d'interet d'avoir un service + data provider si on fait juste un passe plat
   // => boilerplate inutile
@@ -87,11 +88,23 @@ export class PostsServiceFromObsToSignal {
   public readonly hasError = computed(() => !!this.postsResponse().error);
 
   public update(post: Post): Observable<WebApiResponse<Post>> {
-    return this._postsDP.update(post).pipe(take(1), finalize(() => {
+
+    const action = this._postsDP.update(post).pipe(take(1), finalize(() => {
       // on refetch les posts après la mise à jour pour avoir les données à jour,
       // mais on pourrait aussi faire du cache management pour éviter de faire un refetch complet
       // en gérant un BehaviorSubject dans ce service
       this._postsDP.reload();
-    }))
+    }));
+    // On peut retourner un signal techniquement,
+    // mais l 'interet est limité, car on perd la possibilité de faire du subscribe, du pipe, etc... sur l'observable retourné,
+    // et on ne gagne pas grand chose à avoir un signal pour une action qui est censée être déclenchée par un événement utilisateur (click sur un bouton submit)
+    // et qui n'est pas censée être utilisée dans le template pour faire du data binding
+    // on est dans un cas où, une promise est envisageable (tant que ne cherche pas à faire du chaining d'actions),
+    // mais pas forcément un signal
+    // const signalAction = toSignal(action, {
+    //   injector: this._injector,
+    // });
+
+    return action;
   }
 }
