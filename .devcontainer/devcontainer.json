@@ -7,6 +7,15 @@
 	"features": {
 		"ghcr.io/devcontainers/features/python:1": {},
 		"ghcr.io/devcontainers-community/npm-features/prettier:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"Angular.ng-template",
+				"esbenp.prettier-vscode",
+				"PhilHindle.errorlens"
+			]
+		}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.

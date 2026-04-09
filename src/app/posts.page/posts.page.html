@@ -1,0 +1,42 @@
+@let _hasError = hasError$ | async;
+@let _error = error$ | async;
+@let _data = (posts$ | async) ?? [];
+@let _currentSelection = currentSelection | async;
+
+@if (_hasError) {
+    <p>Error: {{ _error | json }}</p>
+} @else {
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Content</th>
+                <th>Views</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (item of (_data); track $index) {
+                <tr (click)="onSelection(item)">
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.content }}</td>
+                    <td>{{ item.views }}</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (_currentSelection) {
+    <form (submit)="onSubmit()">
+        <label>
+            Tile
+            <input type="text" name="title" [(ngModel)]="_currentSelection.title" />
+        </label>        
+        <label>
+            Content
+            <input type="text" name="content" [(ngModel)]="_currentSelection.content" />
+        </label>
+
+        <button type="submit">Submit</button>
+    </form>
+}
