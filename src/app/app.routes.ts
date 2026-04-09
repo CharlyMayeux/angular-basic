@@ -10,8 +10,8 @@ export const routes: Routes = [
         loadComponent: () => import("./posts.page/posts.page").then((m) => m.PostsPage),
     },
     {
-        path: 'post-signal',
-        loadComponent: () => import("./posts.page-using-signals/posts.page").then((m) => m.PostsPage),
+        path: 'post-to-signal',
+        loadComponent: () => import("./posts.page-using-to-signal/posts.page").then((m) => m.PostsPage),
     },
     {
         path: '',
