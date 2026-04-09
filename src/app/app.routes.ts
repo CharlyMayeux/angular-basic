@@ -10,6 +10,10 @@ export const routes: Routes = [
         loadComponent: () => import("./posts.page/posts.page").then((m) => m.PostsPage),
     },
     {
+        path: 'post-signal',
+        loadComponent: () => import("./posts.page-using-signals/posts.page").then((m) => m.PostsPage),
+    },
+    {
         path: '',
         redirectTo: 'home',
         pathMatch: 'full',

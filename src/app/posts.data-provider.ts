@@ -19,7 +19,7 @@ export type Post = PostResponse;
 @Injectable({
   providedIn: 'root',
 })
-export class PostsDataProvider {
+class PostsDataProvider {
   private readonly _http = inject(HttpClient);
 
   private readonly _refresh  = new BehaviorSubject<void>(void 0);
@@ -47,6 +47,11 @@ export class PostsDataProvider {
     );
   }
 }
+@Injectable({
+  providedIn: 'root',
+})
+export class PostsDataProviderUsingSignals {}
+
 
 @Injectable({
   providedIn: 'root',
@@ -74,7 +79,7 @@ export class PostsService {
 @Injectable({
   providedIn: 'root',
 })
-export class PostsServiceFromObsToSignal {
+export class PostsServiceUsingSignals {
   private readonly _injector = inject(Injector);
   private readonly _postsDP = inject(PostsDataProvider);
   // Pas d'interet d'avoir un service + data provider si on fait juste un passe plat
@@ -100,7 +105,10 @@ export class PostsServiceFromObsToSignal {
     // et on ne gagne pas grand chose à avoir un signal pour une action qui est censée être déclenchée par un événement utilisateur (click sur un bouton submit)
     // et qui n'est pas censée être utilisée dans le template pour faire du data binding
     // on est dans un cas où, une promise est envisageable (tant que ne cherche pas à faire du chaining d'actions),
-    // mais pas forcément un signal
+    // c'est d'autent plus vraie que la gestiond es forms attend une promise pour la partie subtmit,
+    // donc on pourrait retourner une promise à la place d'un signal pour être plus dans les clous de ce qui est attendu par les forms,
+    // et éviter de faire du toSignal dans la fonction onSubmit du composant
+    // https://angular.dev/guide/forms/signals/validation voir le code
     // const signalAction = toSignal(action, {
     //   injector: this._injector,
     // });
