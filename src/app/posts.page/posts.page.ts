@@ -1,8 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { PostsService } from '../posts.data-provider';
 import { AsyncPipe, JsonPipe } from '@angular/common';
-import { BehaviorSubject, Observable, take } from 'rxjs';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { PostsService } from '../posts.data-provider';
+
+import { BehaviorSubject, Observable, take } from 'rxjs';
+
 import { Post } from '../post.model';
 import { ErrorResponse } from '../web-api.model';
 
@@ -34,5 +36,4 @@ export class PostsPage {
       this._postsService.update(selection).pipe(take(1)).subscribe();
     }
   }
-
 }
