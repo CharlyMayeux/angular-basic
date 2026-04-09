@@ -1,9 +1,9 @@
-import { Component, inject, model, signal } from '@angular/core';
-import { Post, PostsServiceUsingSignals } from '../posts.data-provider';
-import { AsyncPipe, JsonPipe } from '@angular/common';
-import { BehaviorSubject, take } from 'rxjs';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { PostsServiceUsingSignals } from '../posts-with-signals.data-provider';
+import { JsonPipe } from '@angular/common';
+import { take } from 'rxjs';
 import { form, FormField, submit } from '@angular/forms/signals';
+import { Post } from '../post.model';
 
 @Component({
   selector: 'app-posts.page',

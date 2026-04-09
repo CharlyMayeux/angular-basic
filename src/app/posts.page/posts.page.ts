@@ -1,8 +1,9 @@
 import { Component, inject } from '@angular/core';
-import { PostsService, Post } from '../posts.data-provider';
+import { PostsService } from '../posts.data-provider';
 import { AsyncPipe, JsonPipe } from '@angular/common';
 import { BehaviorSubject, take } from 'rxjs';
 import { FormsModule } from '@angular/forms';
+import { Post } from '../post.model';
 
 @Component({
   selector: 'app-posts.page',
