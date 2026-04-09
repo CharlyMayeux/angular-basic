@@ -1,10 +1,11 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 
 import { BehaviorSubject, finalize, map, Observable, shareReplay, Subject, switchMap, take, tap } from 'rxjs';
 
 import { WebApiResponse } from './web-api.model';
 import { errorOperator } from './web-api.utils';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 type PostResponse = {
   id: string;
@@ -60,13 +61,37 @@ export class PostsService {
   public readonly error$ = this.postsResponse$.pipe(map((response) => (response.error ?? [])));
   public readonly hasError$ = this.postsResponse$.pipe(map((response) => !!response.error));
 
-  public update(post: Post): void {
-    this._postsDP.update(post).pipe(take(1), finalize(() => {
+  public update(post: Post): Observable<WebApiResponse<Post>> {
+    return this._postsDP.update(post).pipe(take(1), finalize(() => {
       // on refetch les posts après la mise à jour pour avoir les données à jour,
       // mais on pourrait aussi faire du cache management pour éviter de faire un refetch complet
       // en gérant un BehaviorSubject dans ce service
       this._postsDP.reload();
-    })).subscribe();
+    }))
   }
 }
 
+@Injectable({
+  providedIn: 'root',
+})
+export class PostsServiceFromObsToSignal {
+  private readonly _postsDP = inject(PostsDataProvider);
+  // Pas d'interet d'avoir un service + data provider si on fait juste un passe plat
+  // => boilerplate inutile
+  public readonly postsResponse = toSignal(this._postsDP.postsResponse$, {
+    initialValue: { data: [], error: [] } as WebApiResponse<Post[]>,
+  });
+  // on sépare donc la couche de service de la couche de data provider pour pouvoir faire du mapping, du caching, etc... dans le service sans impacter le data provider
+  public readonly posts = computed(() => this.postsResponse().data ?? []);
+  public readonly error = computed(() => this.postsResponse().error ?? []);
+  public readonly hasError = computed(() => !!this.postsResponse().error);
+
+  public update(post: Post): Observable<WebApiResponse<Post>> {
+    return this._postsDP.update(post).pipe(take(1), finalize(() => {
+      // on refetch les posts après la mise à jour pour avoir les données à jour,
+      // mais on pourrait aussi faire du cache management pour éviter de faire un refetch complet
+      // en gérant un BehaviorSubject dans ce service
+      this._postsDP.reload();
+    }))
+  }
+}

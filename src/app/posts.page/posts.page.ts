@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { PostsService, Post } from '../posts.data-provider';
 import { AsyncPipe, JsonPipe } from '@angular/common';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, take } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -29,7 +29,7 @@ export class PostsPage {
   public onSubmit() {
     const selection = this.currentSelection.getValue();
     if (selection) {
-      this._postsService.update(selection);
+      this._postsService.update(selection).pipe(take(1)).subscribe();
     }
   }
 
