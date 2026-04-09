@@ -53,7 +53,7 @@ export class PostsDataProviderUsingSignals  {
 @Injectable({
   providedIn: 'root',
 })
-export class PostsServiceUsingSignals {
+export class PostsServiceUsingToSignals {
   private readonly _injector = inject(Injector);
   private readonly _postsDP = inject(PostsDataProviderUsingSignals);
   // Pas d'interet d'avoir un service + data provider si on fait juste un passe plat
@@ -90,9 +90,6 @@ export class PostsServiceUsingSignals {
   }
   public async updateUsingPromise(post: Post): Promise<WebApiResponse<Post>> {
     const response = await this._postsDP.updateUsingPromise(post);
-    // on refetch les posts après la mise à jour pour avoir les données à jour,
-    // mais on pourrait aussi faire du cache management pour éviter de faire un refetch complet
-    // en gérant un BehaviorSubject dans ce service
     this._postsDP.reload();
     return response;
   }

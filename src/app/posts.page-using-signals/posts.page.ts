@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { PostsServiceUsingSignals } from '../posts-with-signals.data-provider';
+import { PostsServiceUsingToSignals } from '../posts-with-signals.data-provider';
 import { JsonPipe } from '@angular/common';
 import { take } from 'rxjs';
 import { form, FormField, submit } from '@angular/forms/signals';
@@ -12,7 +12,7 @@ import { Post } from '../post.model';
   styleUrl: './posts.page.scss',
 })
 export class PostsPage {
-  private readonly _postsService = inject(PostsServiceUsingSignals);
+  private readonly _postsService = inject(PostsServiceUsingToSignals);
   public readonly posts = this._postsService.posts;
   public readonly hasError = this._postsService.hasError;
   public readonly error = this._postsService.error;
