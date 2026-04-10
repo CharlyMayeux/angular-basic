@@ -1,10 +1,9 @@
 import { Component, inject, Signal, signal, WritableSignal } from '@angular/core';
-import { PostsServiceUsingToSignals } from '../posts-with-to-signals.data-provider';
 import { JsonPipe } from '@angular/common';
-import { take } from 'rxjs';
 import { FieldTree, form, FormField, submit } from '@angular/forms/signals';
 import { Post, PostResponse } from '../post.model';
 import { ErrorResponse } from '../web-api.model';
+import { PostsServiceUsingSignals } from '../posts-with-signals.data-provider';
 
 @Component({
   selector: 'app-posts.page',
@@ -13,7 +12,7 @@ import { ErrorResponse } from '../web-api.model';
   styleUrl: './posts.page.scss',
 })
 export class PostsPage {
-  private readonly _postsService: PostsServiceUsingToSignals = inject(PostsServiceUsingToSignals);
+  private readonly _postsService: PostsServiceUsingSignals = inject(PostsServiceUsingSignals);
   public readonly posts: Signal<Post[]> = this._postsService.posts;
   public readonly hasError: Signal<boolean> = this._postsService.hasError;
   public readonly error: Signal<ErrorResponse[]> = this._postsService.error;
