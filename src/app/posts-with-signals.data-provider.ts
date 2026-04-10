@@ -1,4 +1,4 @@
-import { HttpClient, httpResource } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
 
 import { toSignal } from '@angular/core/rxjs-interop';
 import { computed, inject, Injectable, Injector, Signal } from '@angular/core';
@@ -20,20 +20,25 @@ export class PostsDataProviderUsingSignals  {
     return 'http://localhost:3000/posts' ;
   }, {
     parse: (response) => ({ data: response } as WebApiResponse<Post[]>),
+    defaultValue: { data: [], error: [] } as WebApiResponse<Post[]>,
   });
-
+  
+  // il manque la partie parseError poru formatter les erreurs de la même manière que dans le data provider utilisant rxjs
   public readonly postResponse = computed(() => {
     const response = this._postResponse.value();
     const error = this._postResponse.error();
     if (response) {
       return response;
-    } else if (error) {
-      return { data: [], error: [error] } as WebApiResponse<Post[]>;
+    }
+    if (error instanceof HttpErrorResponse || error instanceof Error) {
+      return { data: null, error: [{
+        message: error.message,
+      }] } as WebApiResponse<Post[]>;
     } else {
-      return { data: [], error: [] } as WebApiResponse<Post[]>;
+      return { data: null, error: [{ message: 'An unknown error occurred' }] } as WebApiResponse<Post[]>;
     }
   });
-  
+
   public reload(): void {
     this._postResponse.reload();
   }
